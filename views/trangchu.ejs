@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Realtime</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="jquery-3.5.1.min.js"></script>
+    <script>
+        var socket = io("http://localhost:3000");
+
+        socket.on("server_send_dangky_thatbai", (data) =>{
+            alert("User " + data + " is not availble!");
+        });
+
+        socket.on("server_send_dangky_thanhcong", (data) =>{
+            var html = "<div socketid='"+data.id+"' class='motUser'>"+data.username+"</div>";
+            $("#danhSachUserOnline").append(html);
+            //ẩn ô đăng ký đi
+        });
+
+        socket.on("server_gui_message", (data) =>{
+            var hoten = "<span class='hoten'>" +data.Username+ "</span>";
+            var msg = "<span class='msg'>" + data.msg+ "</span>";
+            $("#dsMsg").append(`${hoten}: ${msg} <div class='block'></div>`);
+        })
+
+        socket.on("server_xuly_chocgheo", (data) => {
+            alert(data + "vừa mới chọc ghẹo bạn :D");
+        });
+
+        $(document).ready(() => {
+            $("#btnDangKy").click(() => {
+                socket.emit("client_gui_username", $("#txtUser").val());
+            });
+            $("#btnChat").click(() => {
+                socket.emit("client_gui_message", $("#txtMessage").val());
+                $("#txtMessage").val("");
+            });
+            $(document).on("click", ".motUser", () => {
+                var id = $(this).attr("socketid");
+                socket.emit("user_chocgheo_socketid_khac", id);
+            });
+        });
+    </script>
+    <link rel="stylesheet" type="text/css" href="./main.css">
+</head>
+<body>
+    <div id="wrapper">
+        <h1>DEMON CHAT SOCKET IO - NODEJS</h1>
+        <input type="text" id="txtUser" placeholder="Username. . .">
+        <input type="button" id="btnDangKy" value="Đăng Ký">
+        <div class="block"></div>
+        <div id="left">
+            <div id="title">Users Online</div>
+            <div id="danhSachUserOnline"></div>
+        </div>
+        <div id="right">
+            <div id="dsMsg"></div>
+            <div id="block"></div>
+            <input type="text" id="txtMessage" placeholder="Message. . .">
+            <input type="button" id="btnChat" value="Send">
+        </div>
+    </div>
+</body>
+</html>
